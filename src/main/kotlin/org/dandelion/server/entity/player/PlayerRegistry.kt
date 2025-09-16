@@ -7,7 +7,6 @@ import org.dandelion.server.events.PlayerPreConnectEvent
 import org.dandelion.server.events.manager.EventDispatcher
 import org.dandelion.server.level.Level
 import org.dandelion.server.level.LevelRegistry
-import org.dandelion.server.models.ModelRegistry
 import org.dandelion.server.network.PacketRegistry
 import org.dandelion.server.network.packets.classic.client.ClientIdentification
 import org.dandelion.server.network.packets.classic.server.ServerDisconnectPlayer
@@ -124,7 +123,7 @@ object PlayerRegistry {
         val ip = remoteAddress.address.hostAddress
         player.info.addIp(ip)
 
-        player.joinLevel(joinLevel)
+        player.sendToLevel(joinLevel)
         player.displayName = MessageRegistry.Server.Player.getDisplayName(player)
 
         TabList.sendFullTabListTo(player)

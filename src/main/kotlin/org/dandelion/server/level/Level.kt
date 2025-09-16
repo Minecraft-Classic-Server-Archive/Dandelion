@@ -47,6 +47,7 @@ class Level(
     internal val entities = HashMap<Byte, Entity>(MAX_ENTITIES)
 
     init {
+        spawn.level = this
         initializeEntityIdPool()
     }
 

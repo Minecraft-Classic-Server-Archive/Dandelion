@@ -19,7 +19,7 @@ open class Entity(
     val name: String,
     var levelId: String = "",
     var entityId: Byte = -1,
-    val position: Position = Position(0f, 0f, 0f, 0f, 0f),
+    var position: Position = Position(0f, 0f, 0f, 0f, 0f),
 ) {
     var level: Level? = null
     var displayName: String = name
@@ -77,7 +77,11 @@ open class Entity(
 
     // region Position Management
     open fun teleportTo(position: Position) {
-        teleportTo(
+        if (position.level != null && position.level != this.level) {
+            sendToLevel(position.level!!, false)
+        }
+
+        teleport(
             position.x,
             position.y,
             position.z,
@@ -87,7 +91,7 @@ open class Entity(
     }
 
     open fun teleportTo(x: Int, y: Int, z: Int) {
-        teleportTo(
+        teleport(
             x.toFloat(),
             y.toFloat(),
             z.toFloat(),
@@ -97,10 +101,10 @@ open class Entity(
     }
 
     open fun teleportTo(x: Float, y: Float, z: Float) {
-        teleportTo(x, y, z, position.yaw, position.pitch)
+        teleport(x, y, z, position.yaw, position.pitch)
     }
 
-    open fun teleportTo(
+    open fun teleport(
         x: Float,
         y: Float,
         z: Float,
@@ -108,7 +112,13 @@ open class Entity(
         pitch: Float,
         moveMode: MoveMode = MoveMode.INSTANT,
         interpolateOrientation: Boolean = false,
+        level: Level? = null,
     ) {
+        if (level != null && level != this.level) {
+            sendToLevel(level, false)
+            return
+        }
+
         val actualUsePosition =
             x != this.position.x || y != this.position.y || z != this.position.z
         val actualUseOrientation =
@@ -128,8 +138,12 @@ open class Entity(
         )
     }
 
+    fun teleportTo(position: Position, moveMode: MoveMode = MoveMode.INSTANT, interpolateOrientation: Boolean = false) {
+        teleport(position.x, position.y, position.z, position.yaw, position.pitch, moveMode, interpolateOrientation, position.level)
+    }
+
     open fun rotateTo(yaw: Float, pitch: Float) {
-        teleportTo(position.x, position.y, position.z, yaw, pitch)
+        teleport(position.x, position.y, position.z, yaw, pitch)
     }
 
     open fun updatePositionAndOrientation(
@@ -418,7 +432,7 @@ open class Entity(
     // endregion
 
     // region Level Management
-    open fun joinLevel(level: Level, notifyJoin: Boolean = false) {
+    open fun sendToLevel(level: Level, notifyJoin: Boolean = false) {
         if (!level.tryAddEntity(this)) return
 
         this.level = level

@@ -7,7 +7,7 @@ import org.dandelion.server.server.Console
 import org.dandelion.server.util.JsonConfig
 
 internal object JsonBlockLoader {
-    private const val BLOCK_DEFS_DIRECTORY = "blockDefs"
+    private const val BLOCK_DEFS_DIRECTORY = "blockdefs"
     private const val GLOBAL_BLOCKS_FILE = "global.json"
 
     fun loadAllBlockDefinitions() {

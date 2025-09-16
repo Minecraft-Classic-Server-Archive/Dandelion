@@ -376,7 +376,7 @@ class LevelCommand : Command {
                 executor
             }
 
-        targetPlayer.joinLevel(level, true)
+        targetPlayer.sendToLevel(level, true)
         if (executor != targetPlayer) {
             MessageRegistry.Commands.Level.Teleport.sendSuccessOther(
                 executor,

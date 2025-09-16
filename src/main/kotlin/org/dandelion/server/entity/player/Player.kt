@@ -215,7 +215,7 @@ class Player(
 
     // endregion
     // region Position Management
-    override fun teleportTo(
+    override fun teleport(
         x: Float,
         y: Float,
         z: Float,
@@ -223,7 +223,13 @@ class Player(
         pitch: Float,
         moveMode: MoveMode,
         interpolateOrientation: Boolean,
+        level: Level?,
     ) {
+        if (level != null && level != this.level) {
+            sendToLevel(level, true)
+            position = Position(x, y, z, yaw, pitch, level)
+            return
+        }
 
         val actualUsePosition =
             x != this.position.x || y != this.position.y || z != this.position.z
@@ -333,6 +339,10 @@ class Player(
         }
     }
 
+    fun teleport(position: Position, moveMode: MoveMode = MoveMode.INSTANT, interpolateOrientation: Boolean = false) {
+        teleportTo(position, moveMode, interpolateOrientation)
+    }
+
     override fun updatePositionAndOrientation(
         newX: Float,
         newY: Float,
@@ -385,7 +395,7 @@ class Player(
 
     // region Level Management
     @OptIn(DelicateCoroutinesApi::class)
-    override fun joinLevel(level: Level, notifyJoin: Boolean) {
+    override fun sendToLevel(level: Level, notifyJoin: Boolean) {
         if (level.getAvailableIds() <= 0) {
             sendMessage(MessageRegistry.Server.Level.getFull())
             return
@@ -399,6 +409,8 @@ class Player(
 
         this.level?.removeEntity(this)
         this.level = null
+
+        position = level.spawn
 
         GlobalScope.launch {
             transmitLevelData(level, notifyJoin)
@@ -730,17 +742,16 @@ class Player(
         BlockRegistry.sendBlockDefinitions(this)
         level.spawnPlayerInLevel(this)
         updateTabList()
-        teleportTo(level.spawn)
         setSpawnPoint(level.spawn)
         ServerLevelFinalize(level.size.x, level.size.y, level.size.z)
             .send(channel)
         ServerSetPositionAndOrientation(
-                -1,
-                spawnPosition.x,
-                spawnPosition.y,
-                spawnPosition.z,
-                spawnPosition.yaw,
-                spawnPosition.pitch,
+            -1,
+            this.position.x,
+            this.position.y,
+            this.position.z,
+                this.position.yaw,
+                this.position.pitch,
             )
             .send(channel)
 
@@ -778,7 +789,7 @@ class Player(
     }
 
     override fun sendMessageAs(message: String) {
-        val processedMessage = message.replace(Regex("(&[0-9a-fA-F])%"), "$1&")
+        val processedMessage = message.replace(Regex("%([0-9a-fA-F])"), "&$1")
         val event = PlayerSendMessageEvent(this, processedMessage)
         EventDispatcher.dispatch(event)
 
@@ -973,7 +984,7 @@ class Player(
             when {
                 supports("InstantMOTD") ->
                     ServerIdentification(serverMotd = value).send(channel)
-                level != null -> joinLevel(level!!, false)
+                level != null -> sendToLevel(level!!, false)
             }
         }
 
@@ -1021,7 +1032,7 @@ class Player(
     fun removeGroup(group: String): Boolean {
         val result = PlayerRegistry.removeGroup(this.name, group)
         TabList.updatePlayer(this)
-        return result;
+        return result
     }
 
     // endregion

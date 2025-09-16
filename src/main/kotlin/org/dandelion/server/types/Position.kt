@@ -1,5 +1,6 @@
 package org.dandelion.server.types
 
+import org.dandelion.server.level.Level
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -9,6 +10,7 @@ data class Position(
     var z: Float,
     var yaw: Float = 0f,
     var pitch: Float = 0f,
+    var level: Level? = null,
 ) {
     constructor(
         x: Number,
@@ -16,7 +18,8 @@ data class Position(
         z: Number,
         yaw: Float = 0f,
         pitch: Float = 0f,
-    ) : this(x.toFloat(), y.toFloat(), z.toFloat(), yaw, pitch)
+        level: Level? = null,
+    ) : this(x.toFloat(), y.toFloat(), z.toFloat(), yaw, pitch, level)
 
     fun set(x: Float, y: Float, z: Float, yaw: Float, pitch: Float) {
         this.x = x
