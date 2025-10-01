@@ -1,4 +1,4 @@
-package org.dandelion.server.parsers
+package org.dandelion.server.models
 
 import org.dandelion.server.types.AnimData
 import kotlin.math.PI

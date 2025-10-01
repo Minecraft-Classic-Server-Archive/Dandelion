@@ -3,6 +3,7 @@
 ## New Features
 - position now has Level, when it is non null when teleporting the player to this location it will send the player to that level
 - custom model support added based on zoey's CustomModel plugin for mcg
+- added custom particle supports, based on zoey's goodly effects
 
 ## fixes
 - fixed color messages not working due to typo in regex
@@ -10,7 +11,7 @@
 ## BREAKING
 - player.joinLevel now is player.sendToLevel
 - Players renamed to PlayerRegistry, Levels renamed to LevelRegistry
-- "blockDefs" folder renamed to "blockdefs"
+- "blockDefs" folder renamed to "blockdefs" (without capital d)
 
 ## CPE Extensions
 

@@ -5,9 +5,48 @@ import org.dandelion.server.entity.player.PlayerRegistry
 import org.dandelion.server.network.packets.cpe.server.ServerDefineEffect
 import org.dandelion.server.network.packets.cpe.server.ServerSpawnEffect
 import org.dandelion.server.types.Position
+import java.io.File
 
 object ParticleRegistry {
     private val registry: Array<Particle?> = arrayOfNulls(256)
+    private val particleNames: MutableMap<String, Byte> = mutableMapOf()
+
+    @JvmStatic
+    fun init() {
+        val particlesDir = File("particles")
+        if (!particlesDir.exists()) {
+            particlesDir.mkdirs()
+            println("Created particles directory")
+        }
+
+        val propertyFiles = particlesDir.listFiles { file ->
+            file.isFile && file.extension.equals("properties", ignoreCase = true)
+        }
+
+        if (propertyFiles != null) {
+            for (file in propertyFiles) {
+                val particle = ParticleParser.parseParticleFile(file)
+                if (particle != null) {
+                    val success = addParticle(particle)
+                    if (success) {
+                        val particleName = file.nameWithoutExtension
+                        particleNames[particleName] = particle.effectId
+                        println("Loaded particle: $particleName (ID: ${particle.effectId})")
+                    } else {
+                        println("Failed to register particle from file: ${file.name}")
+                    }
+                }
+            }
+        }
+
+        println("Loaded ${particleNames.size} particles")
+    }
+
+    @JvmStatic
+    fun getParticleByName(name: String): Particle? {
+        val effectId = particleNames[name] ?: return null
+        return getParticle(effectId)
+    }
 
     @JvmStatic
     fun addParticle(particle: Particle): Boolean {
@@ -101,6 +140,12 @@ object ParticleRegistry {
     @JvmStatic
     fun spawnParticleFor(player: Player, effectId: Byte, location: Position, origin: Position) {
         val particle = getParticle(effectId) ?: return
+        spawnParticleFor(player, particle, location, origin)
+    }
+
+    @JvmStatic
+    fun spawnParticleByName(player: Player, name: String, location: Position, origin: Position) {
+        val particle = getParticleByName(name) ?: return
         spawnParticleFor(player, particle, location, origin)
     }
 }

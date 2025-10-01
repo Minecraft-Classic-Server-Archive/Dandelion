@@ -1,7 +1,7 @@
 package org.dandelion.server.models
 
 import com.google.gson.JsonObject
-import org.dandelion.server.parsers.AnimationParser
+import org.dandelion.server.models.AnimationParser
 import org.dandelion.server.types.AnimData
 import org.dandelion.server.types.UVCoords
 import org.dandelion.server.types.vec.FVec
